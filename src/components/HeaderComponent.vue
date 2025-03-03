@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
-import {Router, useRoute, useRouter} from "vue-router";
-// import { useAuthStore } from '@/store/auth'
+import {onMounted, computed} from "vue";
+import {useRoute, useRouter} from "vue-router";
+import { useTokenStore } from '@/stores/loginStore';
 
-// const authStore = useAuthStore()
 const emit = defineEmits(['menuClick', ])
 
 const clickMenu = () => {
@@ -11,8 +10,10 @@ const clickMenu = () => {
 }
 
 const route = useRoute()
+const loginStore = useTokenStore()
+const router = useRouter()
 
-const router = useRouter() as Router
+const userName = computed(() => localStorage.getItem('username'))
 
 onMounted(() => {
   console.log("Header Component mounted.");
@@ -30,14 +31,13 @@ onMounted(() => {
       </q-toolbar-title>
 
       <div class="q-ml-md">
-        123
-        <!-- <template v-if="!authStore.userIsLoggedIn">
-          <q-btn flat label="로그인" @click="router.push('/Login')" />
+        <template v-if="!userName">
+          <q-btn flat label="로그인" @click="router.push('/LoginPage')" />
         </template>
         <template v-else>
-          <span class="q-mr-sm">{{ authStore.currentUser?.username }}</span>
-          <q-btn flat label="로그아웃" @click="authStore.logout()" />
-        </template> -->
+          <span class="q-mr-sm">{{ userName }}</span>
+          <q-btn flat label="로그아웃" @click="loginStore.clearToken()" />
+        </template>
       </div>
     </q-toolbar>
   </q-header>
