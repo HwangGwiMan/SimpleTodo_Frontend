@@ -24,7 +24,7 @@ const selectedRow = ref<TodoRow[]>([])
 
 const api = {
   getByUserId: async (userId: number) => {
-    const response = await apiInstance.post(`todos/get/by-user-id/`, {userId})
+    const response = await apiInstance.post(`todos/get/${userId}`)
     console.log(response)
   },
   save: async (todo: unknown) => {
@@ -41,6 +41,9 @@ const state = reactive({
     { name: 'description', label: 'Description', field: 'description' },
     { name: 'completed', label: 'Completed', field: 'completed' },
   ],
+
+  // 로그인 여부
+  isLogin: loginStore.isLoggedIn,
 })
 
 const addTodo = () => {
@@ -71,15 +74,12 @@ const saveTodo = () => {
     })
     return
   }
-  api.save({todos :saveRows})
+  api.save({todoList :saveRows})
 }
 
-// TODO
-// 조회해온 Todo 리스트를 테이블에 출력
 const getTodoList = async () => {
   if(loginStore.userId !== null) {
     const response = await api.getByUserId(loginStore.userId)
-    console.log(response)
   }
 }
 
@@ -107,8 +107,8 @@ onMounted(() => {
     >
     <template v-slot:top>
       <q-btn color="secondary"  label="Save" @click="saveTodo" />
-      <q-btn color="primary" class="q-ml-sm" label="Add row" @click="addTodo" />
-      <q-btn color="primary" class="q-ml-sm" label="Delete selected" @click="deleteTodo" />
+      <q-btn color="primary" class="q-ml-sm" label="Add" @click="addTodo" />
+      <q-btn color="primary" class="q-ml-sm" label="Delete" @click="deleteTodo" />
     </template>
 
     <template v-slot:body-cell-dirtyFlag="props">

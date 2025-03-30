@@ -13,7 +13,7 @@ const state = reactive({
 
 const api = {
   register: async (username: string | number | null, password: string | number | null) => {
-    const response = await axios.post('http://localhost:8080/api/users/signup', { username, password });
+    const response = await axios.post('http://localhost:8080/api/user/signup', { username, password });
     return response.data;
   }
 }
@@ -39,6 +39,15 @@ const register = () => {
         timeout: 3000,
       })
       router.push('/LoginPage')
+    }
+  }, (err) => {
+    if(err.response.data && err.response.data.code) {
+      Notify.create({
+        message: err.response.data.message,
+        color: 'red',
+        position: 'top',
+        timeout: 3000,
+      })
     }
   })
 }

@@ -14,8 +14,8 @@ const state = reactive({
 
 const api = {
   login: async (username: string | number | null, password: string | number | null) => {
-    await axios.post('http://localhost:8080/api/users/login', { username, password }).then((res) => {
-      useTokenStore().loginAccess(res.data.accessToken, res.data.refreshToken, res.data.username, res.data.userId)
+    await axios.post('http://localhost:8080/api/user/login', { username, password }).then((res) => {
+      useTokenStore().loginAccess(res.data.accessToken, res.data.refreshToken, res.data.userName, res.data.userId)
       router.push('/HomePage')
     }, (error) => {
       Notify.create({
