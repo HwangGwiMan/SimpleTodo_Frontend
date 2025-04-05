@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import apiInstance from '@/api/apiInstance';
-import { onMounted, reactive, ref } from 'vue';
-import { Notify, type QTableProps } from 'quasar';
-import _  from 'lodash';
-import { useTokenStore } from '@/stores/loginStore';
+import {onMounted, reactive, ref} from 'vue';
+import {Notify, type QTableProps} from 'quasar';
+import _ from 'lodash';
+import {useTokenStore} from '@/stores/loginStore';
+import CommonUtil from '@/utils/CommonUtil';
 
 const loginStore = useTokenStore()
 
 interface TodoRow {
-  dirtyFlag: string
-  id: number
-  title: string
-  description: string
-  completed: boolean
+  id?: number
+  dirtyFlag?: 'I' | 'D' | 'U'
+  userId: number
+  content: string | null
+  startDateTime: string | null
+  endDateTime: string | null
+  alarmDateTime: string | null
 }
 
 const pagination = ref<QTableProps['pagination']>({
@@ -23,13 +26,13 @@ const pagination = ref<QTableProps['pagination']>({
 const selectedRow = ref<TodoRow[]>([])
 
 const api = {
-  getByUserId: async (userId: number) => {
-    const response = await apiInstance.post(`todos/get/${userId}`)
-    console.log(response)
+  getByUserId: async (userId: number) : Promise<TodoRow[]> => {
+    const response = await apiInstance.get(`todos/get/${userId}`)
+    return CommonUtil.response(response)
   },
   save: async (todo: unknown) => {
-    const response = await apiInstance.post('todos/create', todo)
-    console.log(response)
+    const response = await apiInstance.post('todos/save', todo)
+    return CommonUtil.response(response)
   }
 }
 
@@ -37,9 +40,10 @@ const state = reactive({
   rows: [] as TodoRow[],
   columns: [
     { name: 'dirtyFlag', label: 'Dirty', field: 'dirtyFlag' },
-    { name: 'title', label: 'Title', field: 'title' },
-    { name: 'description', label: 'Description', field: 'description' },
-    { name: 'completed', label: 'Completed', field: 'completed' },
+    { name: 'content', label: 'Content', field: 'content' },
+    { name: 'startDateTime', label: 'Start DateTime', field: 'startDateTime' },
+    { name: 'endDateTime', label: 'End DateTime', field: 'endDateTime' },
+    { name: 'alarmDateTime', label: 'Alarm DateTime', field: 'alarmDateTime' },
   ],
 
   // 로그인 여부
@@ -47,15 +51,18 @@ const state = reactive({
 })
 
 const addTodo = () => {
-  // 가장큰 id 값
-  const maxId = Math.max(...state.rows.map((row: TodoRow) => row.id))
+  if (!loginStore.userId) return
+
+  const maxId = Math.max(...state.rows.map((row: TodoRow) => row.id || 0))
 
   state.rows.push({
-    dirtyFlag: 'I',
     id: maxId + 1,
-    title: 'New Todo',
-    description: 'New Todo',
-    completed: false
+    dirtyFlag: 'I',
+    userId: loginStore.userId,
+    content: 'New Todo',
+    startDateTime: null,
+    endDateTime: '',
+    alarmDateTime: ''
   })
 }
 
@@ -79,7 +86,7 @@ const saveTodo = () => {
 
 const getTodoList = async () => {
   if(loginStore.userId !== null) {
-    const response = await api.getByUserId(loginStore.userId)
+    state.rows = await api.getByUserId(loginStore.userId)
   }
 }
 

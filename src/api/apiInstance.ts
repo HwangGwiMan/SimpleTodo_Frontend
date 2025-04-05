@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { Notify } from 'quasar';
 import router from '@/router';
+import { useTokenStore } from '@/stores/loginStore';
+
+const loginStore = useTokenStore()
 
 const apiInstance = axios.create({
   baseURL: 'http://localhost:8080/api/',
@@ -35,7 +38,10 @@ apiInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.log('error', error)
+    if (error.response.data.error === 'INVALID_TOKEN') {
+      loginStore.clearToken();
+      router.push('/LoginPage');
+    }
     return Promise.reject(error);
   }
 );

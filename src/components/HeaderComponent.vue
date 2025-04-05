@@ -13,9 +13,10 @@ const route = useRoute()
 const loginStore = useTokenStore()
 const router = useRouter()
 
-const userName = computed(() => localStorage.getItem('username'))
+const userName = computed(() => loginStore.username)
 
 onMounted(() => {
+  console.log(loginStore.username)
   console.log("Header Component mounted.");
 })
 
