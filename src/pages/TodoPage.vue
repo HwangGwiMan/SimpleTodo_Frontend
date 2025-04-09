@@ -39,17 +39,20 @@ const api = {
 const state = reactive({
   rows: [] as TodoRow[],
   columns: [
-    { name: 'dirtyFlag', label: 'Dirty', field: 'dirtyFlag' },
-    { name: 'content', label: 'Content', field: 'content' },
-    { name: 'startDateTime', label: 'Start DateTime', field: 'startDateTime' },
-    { name: 'endDateTime', label: 'End DateTime', field: 'endDateTime' },
-    { name: 'alarmDateTime', label: 'Alarm DateTime', field: 'alarmDateTime' },
+    { name: 'dirtyFlag', label: 'Dirty', field: 'dirtyFlag', style: 'width: 50px', headerStyle: 'width: 50px' },
+    { name: 'content', label: 'Content', field: 'content', style: 'width: 500px', headerStyle: 'width: 500px' },
+    { name: 'startDateTime', label: 'Start DateTime', field: 'startDateTime', style: 'width: 500px', headerStyle: 'width: 500px' },
+    { name: 'endDateTime', label: 'End DateTime', field: 'endDateTime', style: 'width: 500px', headerStyle: 'width: 500px' },
+    { name: 'alarmDateTime', label: 'Alarm DateTime', field: 'alarmDateTime', style: 'width: 500px', headerStyle: 'width: 500px' },
   ],
 
   // 로그인 여부
-  isLogin: loginStore.isLoggedIn,
+  isLogin: false,
 })
 
+/**
+ * 새로운 할일 추가
+ */
 const addTodo = () => {
   if (!loginStore.userId) return
 
@@ -66,11 +69,17 @@ const addTodo = () => {
   })
 }
 
+/**
+ * 선택된 할일 삭제
+ */
 const deleteTodo = () => {
   const selectedIds = selectedRow.value.map(row => row.id)
   state.rows = state.rows.filter(r => !selectedIds.includes(r.id))
 }
 
+/**
+ * 할일 저장
+ */
 const saveTodo = () => {
   const saveRows = state.rows.filter(r => !_.isNull(r.dirtyFlag))
   if(saveRows.length === 0) {
@@ -84,6 +93,9 @@ const saveTodo = () => {
   api.save({todoList :saveRows})
 }
 
+/**
+ * 할일 목록 조회
+ */
 const getTodoList = async () => {
   if(loginStore.userId !== null) {
     state.rows = await api.getByUserId(loginStore.userId)
@@ -92,6 +104,7 @@ const getTodoList = async () => {
 
 onMounted(() => {
   console.log('TodoPage mounted.')
+  state.isLogin = loginStore.isLoggedIn
   getTodoList()
 })
 
